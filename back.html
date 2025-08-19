@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飛行後計劃平台 - 航班管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box input {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            width: 250px;
+        }
+
+        .search-box input:focus {
+            border-color: #2a5298;
+        }
+
+        .status-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #2a5298;
+            background: white;
+            color: #2a5298;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 700;
+            color: #1e3c72;
+            border-bottom: 2px solid #2a5298;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(42, 82, 152, 0.05);
+            transform: scale(1.001);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(248, 249, 255, 0.5);
+        }
+
+        .flight-number {
+            font-weight: bold;
+            color: #1e3c72;
+            font-size: 16px;
+        }
+
+        .aircraft-number {
+            font-family: 'Courier New', monospace;
+            background: #f0f8ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #2a5298;
+            font-weight: 600;
+        }
+
+        .acars-code {
+            font-family: 'Courier New', monospace;
+            background: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #856404;
+            font-weight: 600;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .status.accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .journey-log-btn {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        .journey-log-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            background: linear-gradient(135deg, #38b755 0%, #30d9a7 100%);
+        }
+
+        .journey-log-btn:active {
+            transform: translateY(0);
+        }
+
+        .pic-name {
+            font-weight: 600;
+            color: #1e3c72;
+            background: #e6f3ff;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .tow-btn {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tow-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(42, 82, 152, 0.3);
+            background: linear-gradient(135deg, #3a62a8 0%, #2e4c82 100%);
+        }
+
+        .tow-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 圖片彈出視窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            max-height: 90%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translate(-50%, -60%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            line-height: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #2a5298;
+        }
+
+        .modal-body {
+            text-align: center;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-body pre {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            max-height: 70vh;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .update-time {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box input {
+                width: 100%;
+            }
+            
+            .filter-btn {
+                flex: 1;
+                text-align: center;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+            
+            .modal-content {
+                padding: 15px;
+                margin: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✈️ 飛行後計劃平台</h1>
+            <div class="subtitle">航班資訊管理系統</div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" placeholder="🔍 搜尋航班號或機號..." id="searchInput" onkeyup="filterTable()">
+            </div>
+            <div class="status-filter">
+                <button class="filter-btn active" onclick="filterTable()">全部航班</button>
+                <button class="refresh-btn" onclick="refreshData()">🔄 重新整理</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="flightTable">
+                <thead>
+                    <tr>
+                        <th>航班號</th>
+                        <th>機號</th>
+                        <th>PIC</th>
+                        <th>ACARS Accept</th>
+                        <th>ACCEPT 時間</th>
+                        <th>mBriefing Accept</th>
+                        <th>mBriefing Submit</th>
+                        <th>起飛地</th>
+                        <th>目的地</th>
+                        <th>ETD</th>
+                        <th>ATD</th>
+                        <th>Journey Log</th>
+                        <th>TOW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI015</td>
+                        <td class="aircraft-number">B18001</td>
+                        <td class="pic-name">王一天</td>
+                        <td class="acars-code">645107</td>
+                        <td class="timestamp">2025/8/15 17:19</td>
+                        <td class="timestamp">2025/8/15 17:24</td>
+                        <td class="timestamp">2025/8/15 23:25</td>
+                        <td>TPE</td>
+                        <td>NRT</td>
+                        <td>17:30</td>
+                        <td>17:25</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI015', 'Log')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI015')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI223</td>
+                        <td class="aircraft-number">B18905</td>
+                        <td class="pic-name">王二天</td>
+                        <td class="acars-code">645109</td>
+                        <td class="timestamp">2025/8/15 17:25</td>
+                        <td class="timestamp">2025/8/15 17:30</td>
+                        <td class="timestamp">2025/8/16 00:42</td>
+                        <td>TPE</td>
+                        <td>BKK</td>
+                        <td>18:15</td>
+                        <td>18:42</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI223', 'JL001235')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI223')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI717</td>
+                        <td class="aircraft-number">B18203</td>
+                        <td class="pic-name">王三天</td>
+                        <td class="acars-code">645111</td>
+                        <td class="timestamp">2025/8/15 17:30</td>
+                        <td class="timestamp">2025/8/15 17:35</td>
+                        <td class="timestamp">2025/8/16 01:15</td>
+                        <td>TPE</td>
+                        <td>SIN</td>
+                        <td>19:00</td>
+                        <td>19:15</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI717', 'JL001236')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI717')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI069</td>
+                        <td class="aircraft-number">B18111</td>
+                        <td class="pic-name">王四天</td>
+                        <td class="acars-code">645113</td>
+                        <td class="timestamp">2025/8/15 17:35</td>
+                        <td class="status error">ERROR</td>
+                        <td class="status error">ERROR</td>
+                        <td>TPE</td>
+                        <td>HKG</td>
+                        <td>20:00</td>
+                        <td>20:28</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI069', 'JL001237')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI069')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI835</td>
+                        <td class="aircraft-number">B18607</td>
+                        <td class="pic-name">王五天</td>
+                        <td class="acars-code">645115</td>
+                        <td class="timestamp">2025/8/15 17:40</td>
+                        <td class="timestamp">2025/8/15 17:45</td>
+                        <td class="timestamp">2025/8/16 02:55</td>
+                        <td>TPE</td>
+                        <td>MNL</td>
+                        <td>20:30</td>
+                        <td>20:55</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI835', 'JL001238')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI835')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI009</td>
+                        <td class="aircraft-number">B18801</td>
+                        <td class="pic-name">王六天</td>
+                        <td class="acars-code">645117</td>
+                        <td class="timestamp">2025/8/15 17:45</td>
+                        <td class="timestamp">2025/8/15 17:50</td>
+                        <td class="timestamp">2025/8/16 03:12</td>
+                        <td>TPE</td>
+                        <td>LAX</td>
+                        <td>21:00</td>
+                        <td>21:12</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI009', 'JL001239')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI009')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI127</td>
+                        <td class="aircraft-number">B18302</td>
+                        <td class="pic-name">王七天</td>
+                        <td class="acars-code">645118</td>
+                        <td class="timestamp">2025/8/15 17:50</td>
+                        <td class="timestamp">2025/8/15 17:55</td>
+                        <td class="timestamp">2025/8/16 03:58</td>
+                        <td>TPE</td>
+                        <td>SFO</td>
+                        <td>21:45</td>
+                        <td>21:58</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI127', 'JL001240')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI127')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI151</td>
+                        <td class="aircraft-number">B18505</td>
+                        <td class="pic-name">王八天</td>
+                        <td class="acars-code">645119</td>
+                        <td class="timestamp">2025/8/15 17:55</td>
+                        <td class="timestamp">2025/8/15 18:00</td>
+                        <td class="timestamp">2025/8/16 04:35</td>
+                        <td>TPE</td>
+                        <td>ICN</td>
+                        <td>22:25</td>
+                        <td>22:35</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI151', 'JL001241')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI151')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI197</td>
+                        <td class="aircraft-number">B18106</td>
+                        <td class="pic-name">王九天</td>
+                        <td class="acars-code">645120</td>
+                        <td class="timestamp">2025/8/15 18:00</td>
+                        <td class="timestamp">2025/8/15 18:05</td>
+                        <td class="timestamp">2025/8/16 05:18</td>
+                        <td>TPE</td>
+                        <td>KIX</td>
+                        <td>23:10</td>
+                        <td>23:18</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI197', 'JL001242')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI197')">查看 TOW</button></td>
+                    </tr>
+                    <tr data-status="accepted">
+                        <td class="flight-number">CI771</td>
+                        <td class="aircraft-number">B18708</td>
+                        <td class="pic-name">王十天</td>
+                        <td class="acars-code">645121</td>
+                        <td class="timestamp">2025/8/15 18:05</td>
+                        <td class="timestamp">2025/8/15 18:10</td>
+                        <td class="timestamp">2025/8/16 05:52</td>
+                        <td>TPE</td>
+                        <td>SGN</td>
+                        <td>23:45</td>
+                        <td>23:52</td>
+                        <td><button class="journey-log-btn" onclick="showJourneyLog('CI771', 'JL001243')">Log</button></td>
+                        <td><button class="tow-btn" onclick="showTOWImage('CI771')">查看 TOW</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="update-time">
+            最後更新時間：<span id="currentTime"></span>
+            <button class="refresh-btn" onclick="refreshData()" style="margin-left: 15px;">
+                🔄 重新整理
+            </button>
+        </div>
+    </div>
+
+    <!-- 圖片彈出視窗 -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">TOW 圖片</span>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <img id="modalImage" src="" alt="TOW 圖片" style="display: none;">
+                <pre id="modalText" style="display: none;"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.getFullYear() + '/' + 
+                             String(now.getMonth() + 1).padStart(2, '0') + '/' + 
+                             String(now.getDate()).padStart(2, '0') + ' ' +
+                             String(now.getHours()).padStart(2, '0') + ':' + 
+                             String(now.getMinutes()).padStart(2, '0') + ':' + 
+                             String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('flightTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < 2; j++) { // 只搜尋航班號和機號
+                    if (cells[j] && cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                rows[i].style.display = found ? '' : 'none';
+            }
+        }
+
+        function refreshData() {
+            // 模擬數據刷新
+            const button = event.target;
+            button.innerHTML = '🔄 更新中...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                updateTime();
+                button.innerHTML = '🔄 重新整理';
+                button.disabled = false;
+                
+                // 可以在這裡添加實際的數據更新邏輯
+                console.log('數據已更新');
+            }, 1500);
+        }
+
+        // TOW 圖片顯示功能
+        function showTOWImage(flightNumber) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalText = document.getElementById('modalText');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            // 設定標題
+            modalTitle.textContent = `航班 ${flightNumber} - TOW 圖片`;
+            
+            // 隱藏文字，顯示圖片
+            modalText.style.display = 'none';
+            modalImage.style.display = 'block';
+            
+            // 設定圖片路徑（假設圖片命名格式為 TOW_航班號.jpg）
+            modalImage.src = `TOW_${flightNumber}.jpg`;
+            
+            // 如果圖片載入失敗，顯示預設圖片或錯誤訊息
+            modalImage.onerror = function() {
+                this.src = 'TOW_default.jpg'; // 預設圖片
+            };
+            
+            // 顯示彈出視窗
+            modal.style.display = 'block';
+        }
+
+        // Journey Log 資料（內嵌在程式中）
+        const journeyLogData = {
+            'default': `B-18666    OPERATION    LOG
+----------------------------------------
+    CI0601 RCTP/VHHH SCHED DATE:1804
+    PIC/DUTY 638001/CA         (DANA)
+    ID2/DUTY 380815/FO
+    ID3/DUTY 380819/FUO
+    ID4/DUTY ******/[ ]
+    ID5/DUTY ******/[ ]
+    ID6/DUTY ******/[ ]
+    L/D PF/PN:2/1 DAY    MANUAL LAND
+    NIGHT TIME: **:**
+    LOG/IRS:**/**
+         TIME       FOB
+    OUT  2322     17.000
+    OFF  2332     16.800
+    ON   0058      8.880
+    IN   0111      8.440
+    INST 0126
+    BLK  0149
+    FUEL ADDED: 00904 GALLON
+    FUEL TOTAL:016940 LB
+    ACCEPT BY PIC: 638001
+----------------------------------------
+    F-OP051AA`
+        };
+
+        // Journey Log 文字檔顯示功能
+        function showJourneyLog(flightNumber, logNumber) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalText = document.getElementById('modalText');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            // 設定標題
+            modalTitle.textContent = `航班 ${flightNumber} - Journey Log (${logNumber})`;
+            
+            // 隱藏圖片，顯示文字
+            modalImage.style.display = 'none';
+            modalText.style.display = 'block';
+            
+            // 所有航班都使用相同的 Journey Log 資料
+            modalText.textContent = journeyLogData['default'];
+            
+            // 顯示彈出視窗
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        // 點擊視窗外部關閉彈出視窗
+        window

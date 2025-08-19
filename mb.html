@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mBriefing 電子飛行計劃操作流程圖</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #808489 0%, #357abd 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #98a9c2 0%, #1e3a5f 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .timeline {
+            padding: 40px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            transform: translateX(-50%);
+        }
+
+        .phase {
+            margin: 40px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .phase-content {
+            width: 85%;
+            max-width: 800px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .phase-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .phase-1 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-2 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-3 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-4 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-5 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-6 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-7 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-8 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+        .phase-9 .phase-content { border-left-color: #607D8B; background: linear-gradient(135deg, #eceff1 0%, #ffffff 100%); }
+
+        .time-badge {
+            position: absolute;
+            left: 50%;
+            top: -15px;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 3;
+            white-space: nowrap;
+        }
+
+        .phase-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phase-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .phase-1 .phase-icon { background: #607D8B; }
+        .phase-2 .phase-icon { background: #607D8B; }
+        .phase-3 .phase-icon { background: #607D8B; }
+        .phase-4 .phase-icon { background: #607D8B; }
+        .phase-5 .phase-icon { background: #607D8B; }
+        .phase-6 .phase-icon { background: #607D8B; }
+        .phase-7 .phase-icon { background: #607D8B; }
+        .phase-8 .phase-icon { background: #607D8B; }
+        .phase-9 .phase-icon { background: #607D8B; }
+
+        .phase-details {
+            line-height: 1.6;
+            color: #34495e;
+        }
+
+        .detail-item {
+            margin: 8px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .detail-item::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        /* 收合式框框樣式 */
+        .collapsible {
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .collapsible-header {
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .collapsible-header:hover {
+            opacity: 0.8;
+        }
+
+        .collapsible-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible.active .collapsible-content {
+            max-height: 600px;
+            padding: 15px 20px;
+        }
+
+        .collapsible.active .toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        /* 不同類型的收合框 */
+        .decision-collapsible .collapsible-header {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .error-collapsible .collapsible-header {
+            background: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #f44336;
+        }
+
+        .success-collapsible .collapsible-header {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .info-collapsible .collapsible-header {
+            background: #e3f2fd;
+            color: #1565c0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .regulation-collapsible .collapsible-header {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .collapsible-content {
+            background: white;
+            line-height: 1.6;
+        }
+
+        .arrow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #667eea;
+            z-index: 1;
+            bottom: -20px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before { display: none; }
+            .phase-content { width: 95%; }
+        }
+
+        /* 圖片按鈕樣式 */
+        .image-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .image-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* 圖片模態框樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 5px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #999;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        /* 列印樣式 */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body { background: white !important; }
+            .container { box-shadow: none !important; border-radius: 0 !important; max-width: none !important; }
+            .phase-content { box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important; page-break-inside: avoid; }
+            .collapsible.active .collapsible-content { max-height: none !important; }
+            .image-btn { display: none !important; }
+            .modal { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✈️ LIDO mBriefing 電子飛行計劃操作流程</h1>
+            <p>以下僅為簽派部“建議”之SOP</p> <p>仍依各單位要求為主</p>
+        </div>
+
+        <div class="timeline">
+            <!-- Phase 1: FDP 報到 -->
+            <div class="phase phase-1">
+                <div class="time-badge">FDP 報到</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">📱</div>
+                        登入與航班確認
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">使用帳號密碼或 Face ID 登入 LIDO mBriefing APP <button class="image-btn" onclick="openImageModal('login.png')">圖</button></div>
+                        <div class="detail-item">確認是否已有航班資訊（系統會依組員名單自動顯示）</div>
+                        
+                        <div class="collapsible decision-collapsible">
+                            <div class="collapsible-header">
+                                ⚠️ 航班資訊處理流程
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                ❌ <strong>沒有航班資訊</strong> → 點選 Search，輸入航班號碼 (如：0100) 進行搜尋 <button class="image-btn" onclick="openImageModal('search.png')">圖</button><br>
+                                ❌ <strong>搜尋不到航班</strong> → 繼續通勤，進入駕駛艙後再下載計畫<br>
+                                ✅ <strong>有航班資訊</strong> → 直接下載計畫
+                            </div>
+                        </div>
+
+                        <div class="detail-item">依組員需求通知 OD 修改計畫</div>
+                        <div class="detail-item">或透過 Briefing - Fuel - Order 功能申請額外油量</div>
+                        
+                        <div class="collapsible info-collapsible">
+                            <div class="collapsible-header">
+                                ℹ️ Fuel Order 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>可輸入加油原因與數值，並自動連動至 L/S、Fuel Sheet，並可透過 ACARS 發送訊息給 OD/MM/LD <button class="image-btn" onclick="openImageModal('fuel.png')">圖</button>
+                            </div>
+                        </div>
+
+                        <div class="collapsible regulation-collapsible">
+                            <div class="collapsible-header">
+                                📖 是否會收到完整新計畫
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                以 <strong>FOM 4.8.3 Short Plan</strong> 為準 <button class="image-btn" onclick="openImageModal('tk1.png')">圖</button>
+                            </div>
+                        </div>
+
+                        <div class="detail-item">如檢視後不需修改 → 由 Captain 點選 <span class="highlight">Accept Flight</span> <button class="image-btn" onclick="openImageModal('accept.png')">圖</button></div>
+                        <div class="detail-item">⚠️ <strong>僅 Captain 有權限執行 Accept Flight</strong></div>
+                        
+                        <div class="collapsible success-collapsible">
+                            <div class="collapsible-header">
+                                ✅ Accept Flight 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>確認已接受電子飛行計畫<br>
+                                <strong>Re-accept：</strong>如開啟後發現已被人接受，可點選右上角功能，Re-accept Flight 再次確認 <button class="image-btn" onclick="openImageModal('reaccept.png')">圖</button><br>
+                                <strong>追蹤功能：</strong>後台可以追蹤是誰誤 Accept Flight
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 2: 進入駕駛艙 -->
+            <div class="phase phase-2">
+                <div class="time-badge">進入駕駛艙</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">✈️</div>
+                        駕駛艙檢查與確認
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">確認航班能下載開啟</div>
+                        <div class="detail-item">由 Captain 點選 <span class="highlight">Accept Flight</span>（確認已接收電子飛行計畫）</div>
+                        
+                        <div class="collapsible error-collapsible">
+                            <div class="collapsible-header">
+                                ❌ 無法開啟檔案處理
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                如仍無法開啟檔案 → 啟用 <span class="highlight">"紙本計畫"</span> 流程
+                            </div>
+                        </div>
+
+                        <div class="collapsible success-collapsible active">
+                            <div class="collapsible-header">
+                                ✅ Accept Flight 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>確認已接受電子飛行計畫<br>
+                                <strong>Re-accept：</strong>如開啟後發現已被人接受，可點選右上角功能，Re-accept Flight 再次確認<br>
+                                <strong>追蹤功能：</strong>後台可以追蹤是誰誤 Accept Flight
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 3: 協作模式設定 -->
+            <div class="phase phase-3">
+                <div class="time-badge">網路與同步確認</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">📡</div>
+                        網路與同步確認
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">組員啟用 <span class="highlight">Real Time Sync</span> 或備援 <span class="highlight">Share</span> <button class="image-btn" onclick="openImageModal('sync.png')">圖</button></div>
+                        <div class="detail-item">完成飛行計畫檢查並確認無誤</div>
+                        
+                        <div class="collapsible info-collapsible active">
+                            <div class="collapsible-header">
+                                ℹ️ Real Time Sync 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>App 內建同步功能，Scratchpad與Attachment和Ａdditional briefing documents不同步，其他資訊會同步<br>
+                                <strong>需求：</strong>需開啟藍芽<br>
+                                <strong>限制：</strong>點選開啟後需等候約30秒，同時間只能有一人開啟 Real Time Sync 房間，不能多人同時開啟<br>
+                                <strong>紀錄邏輯：</strong>依最新的時間判斷
+                            </div>
+                        </div>
+
+                        <div class="collapsible info-collapsible">
+                            <div class="collapsible-header">
+                                ℹ️ Share 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>由組員點選需要被 Share 的資訊並指定人員
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 4: ACARS Accept -->
+            <div class="phase phase-4">
+                <div class="time-badge">計畫確認</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">📋</div>
+                        ACARS Accept 確認
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">依據計畫編號，由 PIC 透過 ACARS Accept 確認計畫</div>
+                        
+                        <div class="collapsible regulation-collapsible">
+                            <div class="collapsible-header">
+                                📖 相關法規
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>AOR 第54條-1 七</strong> 與 <strong>第55條</strong> <button class="image-btn" onclick="openImageModal('tk2.png')">圖</button>
+                            </div>
+                        </div>
+
+                        <div class="detail-item">計畫內容 (NOTAM、ATC、General) 之修改需求，由航務處定義</div>
+                        
+                        <div class="collapsible decision-collapsible">
+                            <div class="collapsible-header">
+                                ⚠️ 簽派部建議討論
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                是否保留標籤頁面 ETP information 請參考 <button class="image-btn" onclick="openImageModal('ETP.png')">圖</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 5: GTB/ATB/特殊狀況 -->
+            <div class="phase phase-5">
+                <div class="time-badge">特殊狀況處理</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">🔄</div>
+                        GTB / ATB / 特殊狀況
+                    </div>
+                    <div class="phase-details">
+                        <div class="collapsible error-collapsible">
+                            <div class="collapsible-header">
+                                ❌ 返回登機門處理
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                若返回登機門並收到新計畫 → 需重新回到 <span class="highlight">Accept Flight</span> 流程<br>
+                                （確認接收到電子飛行計畫，僅 Captain 可執行）<br><br>
+                                組員確認 <span class="highlight">Real Time Sync</span> 是否同步，同步完成並且檢查完資料後，依然必須使用 <span class="highlight">ACARS Accept Release</span> 計畫
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 6: 巡航中檢查 -->
+            <div class="phase phase-6">
+                <div class="time-badge">巡航階段</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">🛫</div>
+                        巡航中 LIDO mBriefing App 異常
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">須再確認全員是否於同一 Sync 房間 <button class="image-btn" onclick="openImageModal('sync time.png')">圖</button></div>
+                        
+                        <div class="collapsible error-collapsible">
+                            <div class="collapsible-header">
+                                ❌ Sync 房間失敗處理
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                如失敗 → 全員退出，再由 Captain 建立新房間
+                            </div>
+                        </div>
+
+                        <div class="collapsible error-collapsible">
+                            <div class="collapsible-header">
+                                ❌ App 異常處理
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                若 App 發生異常 → 透過 ACARS 由簽派部傳送飛行計畫
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 7: 落地後處理 -->
+            <div class="phase phase-7">
+                <div class="time-badge">落地後</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">📤</div>
+                        Submit Flight 作業
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">PIC 檢查資料無誤，確認 POST FLIGHT DATA 已上傳至 Package</div>
+                        <div class="detail-item">點選 <span class="highlight">Submit Flight</span>（代表：送出"個人"飛行資料） <button class="image-btn" onclick="openImageModal('submit.png')">圖</button></div>
+                        
+                        <div class="collapsible success-collapsible active">
+                            <div class="collapsible-header">
+                                ✅ Submit Flight 功能說明
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>功能：</strong>上傳"個人"飛行資料<br>
+                                <strong>查看：</strong>上傳後可由 Flight list -> submitted 看到送出的航班與時間<br>
+                                <strong>修改：</strong>如有需要更改，仍可進去航班內，修改後再次 Submit<br>
+                                <strong>後台設定：</strong>抓取 PIC 最新上傳的資料
+                            </div>
+                        </div>
+
+                        <div class="collapsible info-collapsible">
+                            <div class="collapsible-header">
+                                ℹ️ 飛行後平台設定
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                飛行後平台，可以設定只顯示 PIC 的文件
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="arrow"></div>
+            </div>
+
+            <!-- Phase 8: 文件管理建議 -->
+            <div class="phase phase-8">
+                <div class="time-badge">文件管理</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">📁</div>
+                        POST Flight Data 與文件處理
+                    </div>
+                    <div class="phase-details">
+                        <div class="collapsible regulation-collapsible">
+                            <div class="collapsible-header">
+                                📖 Master Flight Plan 討論建議
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>相關條文：</strong>FOM 4.8.2 <button class="image-btn" onclick="openImageModal('tk3.png')">圖</button><br>
+                                因電子飛行計畫可全部上傳至 Server，並具備 Real Time Sync 功能<br>
+                                <strong>簽派建議：</strong>所有組員皆可 Submit，後台僅保留 PIC（由 ACARS Accept 指定）的資料，以符合 Master 規範
+                            </div>
+                        </div>
+
+                        <div class="collapsible decision-collapsible">
+                            <div class="collapsible-header">
+                                ⚠️ TO DATA 處理建議
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>方案 1：</strong>截圖上傳，檔名：TOW（大小寫皆可） <button class="image-btn" onclick="openImageModal('tow.png')">圖</button><br>
+                                <strong>方案 2：</strong>填寫於 Notes 頁面<br>
+                                <strong>方案 3：</strong>填寫於 Additional Briefing Documents
+                            </div>
+                        </div>
+
+                        <div class="collapsible info-collapsible">
+                            <div class="collapsible-header">
+                                ℹ️ 其他文件處理方式
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>NOTOC：</strong>依據 FOM6.2.4 <button class="image-btn" onclick="openImageModal('tk7.png')">圖</button>與 GOM5.7.2 <button class="image-btn" onclick="openImageModal('tk4.png')">圖</button>，公司已在 Loading 與 CGO 留存文件副本，組員值勤結束後建議妥善丟棄 NOTOC<br><br>
+                                <strong>LoadSheet：</strong>依據 FOM4.9.5 <button class="image-btn" onclick="openImageModal('tk5.png')">圖</button>，公司已透過 ACARS 電子簽章簽名<br>
+                                若為 manual 文件 → 可拍照上傳，檔名：LS（大小寫皆可）<br>
+                                如影像模糊 → 以 Loading 保存之副本為主
+                            </div>
+                        </div>
+
+                        <div class="collapsible decision-collapsible">
+                            <div class="collapsible-header">
+                                ⚠️ Operation Log 方案討論
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <strong>方案一：</strong><br>
+                                • 客製化 LIDO mBriefing -- Journey Log 用以符合公司 Operation Log 與 Rest Time 記錄規範 <button class="image-btn" onclick="openImageModal('log.png')">圖</button><br>
+                                • 組員需同時完成 ACARS Operation Log 與 LIDO mBriefing Data<br>
+                                • 組員 Submit 後，後台僅擷取 PIC 的資料<br>
+                                • 如資料不足 → 再由 ACARS 補齊並要求組員補簽名<br>
+                                • <strong>需獲取 AC120-78B 認證</strong> <br>
+                                <strong>方案二：</strong><br>
+                                • 原 ACARS 資料照相上傳，檔名：LOG（大小寫皆可）<button class="image-btn" onclick="openImageModal('oplog.png')">圖</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Phase 9: 飛行後平台網站範例 -->
+            <div class="phase phase-9">
+                <div class="time-badge">飛行後平台</div>
+                <div class="phase-content">
+                    <div class="phase-title">
+                        <div class="phase-icon">🌐</div>
+                        飛行後平台網站範例
+                    </div>
+                    <div class="phase-details">
+                        <div class="detail-item">查看完整的飛行後文件管理系統</div>
+                        <div class="detail-item">瀏覽已提交的電子飛行記錄</div>
+                        
+                        <div class="collapsible success-collapsible">
+                            <div class="collapsible-header">
+                                ✅ 飛行後平台網站
+                                <span class="toggle-icon">▶</span>
+                            </div>
+                            <div class="collapsible-content">
+                                <a href="back.html" target="_blank" style="color: #607D8B; font-weight: bold; text-decoration: none; border: 2px solid #607D8B; padding: 10px 20px; border-radius: 25px; display: inline-block; transition: all 0.3s ease;">
+                                    🔗 進入飛行後平台網站
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖片模態框 -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeImageModal()">&times;</span>
+            <img id="modalImage" src="" alt="參考圖片">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const collapsibles = document.querySelectorAll('.collapsible');
+            
+            collapsibles.forEach(function(collapsible) {
+                const header = collapsible.querySelector('.collapsible-header');
+                
+                header.addEventListener('click', function() {
+                    collapsible.classList.toggle('active');
+                });
+            });
+        });
+
+        // 圖片模態框功能
+        function openImageModal(imageName) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modalImg.src = imageName;
+            modalImg.alt = '參考圖片: ' + imageName;
+            modal.style.display = 'block';
+            
+            // 點擊模態框背景關閉
+            modal.onclick = function(event) {
+                if (event.target === modal) {
+                    closeImageModal();
+                }
+            }
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+    </script>
+</body>
+</html>
